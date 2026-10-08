@@ -1,0 +1,32 @@
+name: Publish strider-common-lib
+
+on:
+  push:
+    branches:
+      - develop  # 메인 브랜치에 push 될 때마다 배포
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          # 아래 auth 설정 필수 (GitHub Packages 사용하려면)
+          server-id: github
+          server-username: ${{ github.actor }}
+          server-password: ${{ secrets.GIT_PAT_SYLEE }}
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Publish to GitHub Packages
+        run: ./gradlew publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GIT_PAT_SYLEE }}
